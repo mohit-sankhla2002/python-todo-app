@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+        }
+
+        section {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 70%;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .delete-button {
+            background-color: #e74c3c;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Todo List</h1>
+    </header>
+
+    <section>
+        <form id="todoForm" onsubmit="addTodo()">
+            <input type="text"  id="newTodo" placeholder="Add a new todo...">
+        </form>
+
+        <ul id="todoList"></ul>
+
+
+    </section>
+
+    <script>
+        let inputBox = document.getElementById("newTodo");
+        let todoList = document.getElementById("todoList");
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("/todo").then(async (response) => {
+                const todos = await response.json();
+                todos.map((todo) => {
+                    let todoElement = document.createElement('li');
+                    todoElement.innerHTML = todo.todo_name;
+                    let deleteButton = document.createElement('button');
+                    deleteButton.className = "delete-button";
+                    deleteButton.innerText = "DELETE";
+                    deleteButton.onclick=() => deleteTodo(todo.id);
+                    todoElement.appendChild(deleteButton);
+                    todoList.appendChild(todoElement);
+                })
+            }).catch((error) => {
+                console.log(error);
+                alert("Something Went Wrong!");
+            })
+        })
+        function addTodo() {
+            let todoList = document.getElementById("todoList");
+            let input = document.getElementById("newTodo");
+            if (input.value === "") {
+                alert("Please enter a todo");
+                return;
+            }
+            const formData = new FormData();
+            formData.append("todo", input.value);
+            fetch("/todo", {
+                method: "POST",
+                body: formData
+            }).then(async (resp) => {
+                let todo = await resp.json();
+                let li = document.createElement("li");
+                li.innerText = inpu.value;
+                let deleteButton = document.createElement("button");
+                deleteButton.onclick = () => deleteTodo(todo.id);
+                deleteButton.innerHTML = "Delete";
+                deleteButton.className = "delete-button";
+            }).catch((e) => {
+                console.log(e);
+            });
+        }
+
+        function deleteTodo(id) {
+            let formData = new FormData();
+            formData.append("id", id);
+            fetch("/todo", {
+                method: "DELETE", 
+                body: formData
+            }).then(() => {
+                location.reload();
+            }).catch((err) => {
+                console.log(err);
+            })
+        }
+
+    </script>
+
+</body>
+</html>
